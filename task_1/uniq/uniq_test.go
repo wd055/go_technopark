@@ -1,9 +1,8 @@
 package uniq
 
 import (
-	"testing"
-
 	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 func TestUniq(t *testing.T) {
@@ -14,52 +13,46 @@ func TestUniq(t *testing.T) {
 		out  []string
 	}{
 		{
-			name: "test1",
-			in:   []string{"I love music.", "I love music.", "I love music.", "I love music of Kartik.", "I love music of Kartik.", "Thanks."},
+			name: "Без параметров",
+			in:   []string{"I love music.", "I love music.", "I love music.", "", "I love music of Kartik.", "I love music of Kartik.", "Thanks.", "I love music of Kartik.", "I love music of Kartik."},
 			opt:  FlagsStruct{},
-			out:  []string{"I love music.", "I love music of Kartik.", "Thanks."},
+			out:  []string{"I love music.", "", "I love music of Kartik.", "Thanks.", "I love music of Kartik."},
 		},
 		{
-			name: "test2",
-			in:   []string{"I love music.", "I love music.", "I love music.", "I love music of Kartik.", "I love music of Kartik.", "Thanks."},
+			name: "Параметры: С",
+			in:   []string{"I love music.", "I love music.", "I love music.", "", "I love music of Kartik.", "I love music of Kartik.", "Thanks.", "I love music of Kartik.", "I love music of Kartik."},
 			opt:  FlagsStruct{C: true},
-			out:  []string{"3 I love music.", "2 I love music of Kartik.", "1 Thanks."},
+			out:  []string{"3 I love music.", "1 ", "2 I love music of Kartik.", "1 Thanks.", "2 I love music of Kartik."},
 		},
 		{
-			name: "test3",
-			in:   []string{"I love music.", "I love music.", "I love music.", "I love music of Kartik.", "I love music of Kartik.", "Thanks."},
+			name: "Параметры: D",
+			in:   []string{"I love music.", "I love music.", "I love music.", "", "I love music of Kartik.", "I love music of Kartik.", "Thanks.", "I love music of Kartik.", "I love music of Kartik."},
 			opt:  FlagsStruct{D: true},
-			out:  []string{"I love music.", "I love music of Kartik."},
+			out:  []string{"I love music.", "I love music of Kartik.", "I love music of Kartik."},
 		},
 		{
-			name: "test4",
-			in:   []string{"I love music.", "I love music.", "I love music.", "I love music of Kartik.", "I love music of Kartik.", "Thanks."},
+			name: "Параметры: U",
+			in:   []string{"I love music.", "I love music.", "I love music.", "", "I love music of Kartik.", "I love music of Kartik.", "Thanks.", "I love music of Kartik.", "I love music of Kartik."},
 			opt:  FlagsStruct{U: true},
-			out:  []string{"Thanks."},
+			out:  []string{"", "Thanks."},
 		},
 		{
-			name: "test5",
-			in:   []string{"I LOVE MUSIC.", "I love music.", "I LoVe MuSiC.", "I love MuSIC of Kartik.", "I love music of kartik.", "Thanks."},
+			name: "Параметры: I",
+			in:   []string{"I LOVE MUSIC.", "I love music.", "I LoVe MuSiC.", "I love MuSIC of Kartik.", "I love music of kartik.", "Thanks.", "I love music of Kartik.", "I love MuSIC of Kartik."},
 			opt:  FlagsStruct{I: true},
-			out:  []string{"I LOVE MUSIC.", "I love MuSIC of Kartik.", "Thanks."},
+			out:  []string{"I LOVE MUSIC.", "I love MuSIC of Kartik.", "Thanks.", "I love music of Kartik."},
 		},
 		{
-			name: "test6",
-			in:   []string{"We love music.", "I love music.", "They love music.", "I love music of Kartik.", "We love music of Kartik.", "Thanks."},
+			name: "Параметры: F",
+			in:   []string{"We love music.", "I love music.", "They love music.", "", "I love music of Kartik.", "We love music of Kartik.", "Thanks."},
 			opt:  FlagsStruct{F: 1},
-			out:  []string{"We love music.", "I love music of Kartik.", "Thanks."},
+			out:  []string{"We love music.", "", "I love music of Kartik.", "Thanks."},
 		},
 		{
-			name: "test7",
-			in:   []string{"I love music.", "A love music.", "C love music.", "I love music of Kartik.", "We love music of Kartik.", "Thanks."},
+			name: "Параметры: S",
+			in:   []string{"I love music.", "A love music.", "C love music.", "", "I love music of Kartik.", "We love music of Kartik.", "Thanks."},
 			opt:  FlagsStruct{S: 1},
-			out:  []string{"I love music.", "I love music of Kartik.", "We love music of Kartik.", "Thanks."},
-		},
-		{
-			name: "test8",
-			in:   []string{"I love music.", "A love music.", "C love music.", "I love music of Kartik.", "We love music of Kartik.", "Thanks."},
-			opt:  FlagsStruct{C: true, D: true, U: true},
-			out:  nil,
+			out:  []string{"I love music.", "", "I love music of Kartik.", "We love music of Kartik.", "Thanks."},
 		},
 	}
 

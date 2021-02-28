@@ -18,10 +18,8 @@ type FlagsStruct struct {
 }
 
 func Uniq(input []string, flags FlagsStruct) (output []string) {
-	var result []string
-	var prevStr string
+	var prevStr, tmpStr string
 	count := 0
-	strMap := map[string]int{}
 
 	for i, str := range input {
 		newStr := str
@@ -40,21 +38,23 @@ func Uniq(input []string, flags FlagsStruct) (output []string) {
 			newStr = arr[len(arr)-1]
 		}
 
-		if _, ok := strMap[newStr]; !ok {
-			result = append(result, str)
+		if i == 0 {
+			tmpStr = str
 		}
 
-		count++
 		if strings.Compare(newStr, prevStr) != 0 && i != 0 {
-			if tmpStr, add := addToReslut(prevStr, count, flags); add {
+			if tmpStr, add := addToReslut(tmpStr, count, flags); add {
 				output = append(output, tmpStr)
 			}
-			count = 0
+			tmpStr = str
+			count = 1
+		} else {
+			count++
 		}
 		prevStr = newStr
 	}
-	count++
-	if tmpStr, add := addToReslut(prevStr, count, flags); add {
+
+	if tmpStr, add := addToReslut(tmpStr, count, flags); add {
 		output = append(output, tmpStr)
 	}
 
