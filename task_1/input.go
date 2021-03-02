@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"errors"
 	"flag"
 	"fmt"
 	"os"
@@ -20,7 +21,7 @@ func init() {
 	flag.Parse()
 }
 
-func getFlags() (flags uniq.FlagsStruct, err bool) {
+func getFlags() (flags uniq.FlagsStruct, err error) {
 	flag.Visit(func(f *flag.Flag) {
 		switch f.Name {
 		case "c":
@@ -45,42 +46,49 @@ func getFlags() (flags uniq.FlagsStruct, err bool) {
 	})
 
 	if (flags.C && flags.D) || (flags.D && flags.U) || (flags.C && flags.U) {
-		err = true
+		err = errors.New("Ошибка ввода флагов")
 	}
 
 	return flags, err
 }
 
-func input() (result []string) {
-	in := bufio.NewScanner(os.Stdin)
+func input() ([]string, error) {
+	var result []string
+	var in *bufio.Scanner
 
 	if flag.NArg() >= 1 {
 		if fileIn, err := os.Open(flag.Args()[0]); err != nil {
-			panic(err)
+			return nil, errors.New("Ошибка открытия файла")
 		} else {
-			in = bufio.NewScanner(fileIn)
 			defer fileIn.Close()
+			in = bufio.NewScanner(fileIn)
 		}
+	} else {
+		in = bufio.NewScanner(os.Stdin)
 	}
 
 	for in.Scan() {
-		if in.Err() != nil {
-			panic(in.Err())
-		}
 		result = append(result, in.Text())
 	}
-	return
+	if in.Err() != nil {
+		return nil, errors.New("Ошибка чтения с потока")
+	}
+
+	return result, nil
 }
 
 func output(result []string) error {
-	out := bufio.NewWriter(os.Stdout)
+	var out *bufio.Writer
+
 	if flag.NArg() == 2 {
 		if fileOut, err := os.Create(flag.Args()[1]); err != nil {
-			panic(err)
+			return err
 		} else {
 			out = bufio.NewWriter(fileOut)
 			defer fileOut.Close()
 		}
+	} else {
+		out = bufio.NewWriter(os.Stdout)
 	}
 
 	for _, str := range result {

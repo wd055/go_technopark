@@ -6,6 +6,13 @@ import (
 	"math"
 )
 
+var priority = map[float64]float64{
+	'+': 1.0,
+	'-': 1.0,
+	'/': 2.0,
+	'*': 2.0,
+}
+
 func genNumByStr(number []float64) float64 {
 	size := len(number)
 	num := 0.0
@@ -46,17 +53,23 @@ func calculate(numbers *stack.Stack, operators *stack.Stack, operator float64) e
 	return nil
 }
 
+func processingOperators(numbers *stack.Stack, operators *stack.Stack, ch rune) error {
+	if operation, err := operators.Top(); err == nil &&
+		priority[float64(ch)] <= priority[float64(operation)] {
+		if err := calculate(numbers, operators, operation); err != nil {
+			return err
+		}
+		if _, err := operators.Pop(); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func Calc(str string) (float64, error) {
 	var numbers stack.Stack
 	var operators stack.Stack
 	countBracket := 0
-
-	priority := map[float64]float64{
-		'+': 1.0,
-		'-': 1.0,
-		'/': 2.0,
-		'*': 2.0,
-	}
 
 	var number []float64
 	for _, ch := range str {
@@ -69,13 +82,8 @@ func Calc(str string) (float64, error) {
 			number = nil
 
 			if _, contain := priority[float64(ch)]; contain {
-				if operation, err := operators.Top(); err == nil && priority[float64(ch)] <= priority[float64(operation)] {
-					if err := calculate(&numbers, &operators, operation); err != nil {
-						return 0, err
-					}
-					if _, err := operators.Pop(); err != nil {
-						return 0.0, err
-					}
+				if err := processingOperators(&numbers, &operators, ch); err != nil {
+					return 0.0, err
 				}
 				operators.Push(float64(ch))
 			} else if ch == '(' {

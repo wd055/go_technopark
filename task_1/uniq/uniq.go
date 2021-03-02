@@ -62,18 +62,13 @@ func Uniq(input []string, flags FlagsStruct) (output []string) {
 }
 
 func addToReslut(str string, count int, flags FlagsStruct) (string, bool) {
-	if flags.C {
+	switch {
+	case flags.C:
 		return (strconv.Itoa(count) + " " + str), true
-	} else if flags.D {
-		if count > 1 {
-			return str, true
-		}
-	} else if flags.U {
-		if count == 1 {
-			return str, true
-		}
-	} else {
+	case flags.D && count > 1:
+		return str, true
+	case flags.U && count == 1:
 		return str, true
 	}
-	return "", false
+	return str, true
 }

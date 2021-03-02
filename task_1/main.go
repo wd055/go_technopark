@@ -2,26 +2,35 @@ package main
 
 import (
 	"flag"
-	"log"
+	"fmt"
+	"os"
 	"uniq/Uniq"
 )
 
 func main() {
 	if flag.NArg() > 2 {
-		log.Fatal(`Ошибка при вводе аргументов. Используйте -help перед вызовом функции.`)
+		fmt.Println(`Ошибка при вводе аргументов. Используйте -help перед вызовом функции.`)
+		os.Exit(1)
 		return
 	}
 
 	flags, err := getFlags()
-	if err || flags.Help {
-		log.Fatal(`Ошибка при вводе аргументов. Используйте -help перед вызовом функции.`)
+	if err != nil || flags.Help {
+		fmt.Println(`Ошибка при вводе аргументов. Используйте -help перед вызовом функции.`)
+		os.Exit(1)
 		return
 	}
 
-	rows := input()
+	rows, err := input()
+	if err != nil {
+		os.Exit(1)
+		return
+	}
+
 	result := uniq.Uniq(rows, flags)
 
 	if err := output(result); err != nil {
-		log.Fatal(err)
+		os.Exit(1)
+		fmt.Println(err)
 	}
 }
