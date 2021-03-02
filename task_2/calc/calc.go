@@ -17,18 +17,33 @@ func genNumByStr(number []float64) float64 {
 	return num
 }
 
-func calculate(numberR float64, numberL float64, operator float64) (float64, error) {
+func calculate(numbers *stack.Stack, operators *stack.Stack, operator float64) error {
+	numberR, err := (*numbers).Pop()
+	if err != nil {
+		return err
+	}
+	numberL, err := (*numbers).Pop()
+	if err != nil {
+		return err
+	}
+
+	var result float64
 	switch operator {
 	case float64('+'):
-		return (numberL + numberR), nil
+		result = numberL + numberR
 	case float64('-'):
-		return (numberL - numberR), nil
+		result = numberL - numberR
 	case float64('*'):
-		return (numberL * numberR), nil
+		result = numberL * numberR
 	case float64('/'):
-		return (numberL / numberR), nil
+		result = numberL / numberR
+	default:
+		return errors.New("Что за оператор ты кинул сюда?")
 	}
-	return 0, errors.New("Что за оператор ты кинул сюда?")
+
+	(*numbers).Push(result)
+
+	return nil
 }
 
 func Calc(str string) (float64, error) {
@@ -54,26 +69,13 @@ func Calc(str string) (float64, error) {
 			number = nil
 
 			if _, contain := priority[float64(ch)]; contain {
-				if operation, err := operators.Top(); err == nil {
-					if priority[float64(ch)] <= priority[float64(operation)] {
-						var numR, numL float64
-						if numR, err := numbers.Pop(); err != nil {
-							return 0.0, err
-						}
-						if numL, err := numbers.Pop(); err != nil {
-							return 0.0, err
-						}
-						if result, err := calculate(numR, numL, float64(operation)); err == nil {
-							numbers.Push(result)
-						} else {
-							return 0, err
-						}
-						if _, err := operators.Pop(); err != nil {
-							return 0.0, err
-						}
+				if operation, err := operators.Top(); err == nil && priority[float64(ch)] <= priority[float64(operation)] {
+					if err := calculate(&numbers, &operators, operation); err != nil {
+						return 0, err
 					}
-				} else {
-					return 0.0, err
+					if _, err := operators.Pop(); err != nil {
+						return 0.0, err
+					}
 				}
 				operators.Push(float64(ch))
 			} else if ch == '(' {
@@ -81,29 +83,14 @@ func Calc(str string) (float64, error) {
 				operators.Push(float64(ch))
 			} else if ch == ')' {
 				if countBracket < 1 {
-					panic("Скобочки посчитай, у тебя что-то не то!")
+					return 0.0, errors.New("Скобочки посчитай, у тебя что-то не то!")
 				}
 				for operation, err := operators.Pop(); err == nil && operation != '('; operation, err = operators.Pop() {
-
-					var numR, numL float64
-					if numR, err := numbers.Pop(); err != nil {
-						return 0.0, err
-					}
-					if numL, err := numbers.Pop(); err != nil {
-						return 0.0, err
-					}
-					if result, err := calculate(numR, numL, float64(operation)); err == nil {
-						numbers.Push(result)
-					} else {
+					if err := calculate(&numbers, &operators, operation); err != nil {
 						return 0, err
-					}
-					if _, err := operators.Pop(); err != nil {
-						return 0.0, err
 					}
 				}
 				countBracket--
-			} else {
-				panic("Ты шо ввел, дурашка!?)")
 			}
 		}
 	}
@@ -111,8 +98,10 @@ func Calc(str string) (float64, error) {
 	if number != nil {
 		numbers.Push(genNumByStr(number))
 	}
-	for operation, err := operators.Pop(); err == nil; operation = operators.Pop() {
-		numbers.Push(calculate(numbers.Pop(), numbers.Pop(), operation))
+	for operation, err := operators.Pop(); err == nil; operation, err = operators.Pop() {
+		if err := calculate(&numbers, &operators, operation); err != nil {
+			return 0, err
+		}
 	}
 	return numbers[0], nil
 }
